@@ -143,3 +143,235 @@ with right:
 
 ✅ Buy More Land
 """)
+# -------------------------------------------------
+# SCENARIOS
+# -------------------------------------------------
+
+SCENARIOS = [
+
+{
+"issue":"Bio students demand Sports Kits before election.",
+
+"choices":[
+
+{
+"text":"Provide Sports Kits (₹1000)",
+
+"money":-1000,
+
+"bio":15,
+
+"commerce":0,
+
+"arts":0,
+
+"girls":0,
+
+"trust":2,
+
+"popularity":5,
+
+"supporters":8
+
+},
+
+{
+"text":"Ignore",
+
+"money":0,
+
+"bio":-10,
+
+"commerce":0,
+
+"arts":0,
+
+"girls":0,
+
+"trust":-2,
+
+"popularity":-3,
+
+"supporters":-5
+
+}
+
+]
+
+},
+
+{
+
+"issue":"Girls want Cultural Festival.",
+
+"choices":[
+
+{
+
+"text":"Organize Festival (₹2000)",
+
+"money":-2000,
+
+"bio":0,
+
+"commerce":0,
+
+"arts":0,
+
+"girls":20,
+
+"trust":4,
+
+"popularity":5,
+
+"supporters":10
+
+},
+
+{
+
+"text":"Reject",
+
+"money":0,
+
+"bio":0,
+
+"commerce":0,
+
+"arts":0,
+
+"girls":-15,
+
+"trust":-3,
+
+"popularity":-2,
+
+"supporters":-4
+
+}
+
+]
+
+},
+
+{
+
+"issue":"Commerce students want Placement Fair.",
+
+"choices":[
+
+{
+
+"text":"Conduct Placement Fair",
+
+"money":-1500,
+
+"bio":0,
+
+"commerce":20,
+
+"arts":0,
+
+"girls":5,
+
+"trust":3,
+
+"popularity":5,
+
+"supporters":7
+
+},
+
+{
+
+"text":"Promise Later",
+
+"money":0,
+
+"bio":0,
+
+"commerce":-10,
+
+"arts":0,
+
+"girls":0,
+
+"trust":-2,
+
+"popularity":0,
+
+"supporters":0
+
+}
+
+]
+
+}
+
+]
+
+# -------------------------------------------------
+# GAMEPLAY
+# -------------------------------------------------
+
+st.divider()
+
+if player["turn"] <= len(SCENARIOS):
+
+    scene = SCENARIOS[player["turn"]-1]
+
+    st.subheader(f"Turn {player['turn']}")
+
+    st.warning(scene["issue"])
+
+    options = [x["text"] for x in scene["choices"]]
+
+    selected = st.radio(
+
+        "Select your decision",
+
+        options,
+
+        key=f"turn_{player['turn']}"
+
+    )
+
+    if st.button("Confirm Decision"):
+
+        decision = None
+
+        for item in scene["choices"]:
+
+            if item["text"] == selected:
+
+                decision = item
+
+                break
+
+        player["money"] += decision["money"]
+
+        player["bio"] += decision["bio"]
+
+        player["commerce"] += decision["commerce"]
+
+        player["arts"] += decision["arts"]
+
+        player["girls"] += decision["girls"]
+
+        player["trust"] += decision["trust"]
+
+        player["popularity"] += decision["popularity"]
+
+        player["supporters"] += decision["supporters"]
+
+        # Clamp Values
+
+        for grp in ["bio","commerce","arts","girls"]:
+
+            player[grp]=max(0,min(100,player[grp]))
+
+        player["turn"]+=1
+
+        st.success("Decision Applied")
+
+        st.rerun()
