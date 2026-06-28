@@ -1,82 +1,145 @@
 import streamlit as st
 import random
 
-# Game Settings
-if 'game_state' not in st.session_state:
-    st.session_state.game_state = {
-        'stage': 'map', # map, play, game_over
-        'district': None,
-        'fund': 10000,
-        'votes': 0,
-        'land': 0,
-        'turn': 1,
-        'logs': ["Game Shuru! MP ka Neta banne ka safar."]
-    }
+# -------------------------------------------------
+# PAGE CONFIG
+# -------------------------------------------------
 
-def play_action(cost, vote_gain, land_gain, msg):
-    state = st.session_state.game_state
-    if state['fund'] >= cost:
-        state['fund'] -= cost
-        state['votes'] += vote_gain
-        state['land'] += land_gain
-        state['turn'] += 1
-        state['logs'].insert(0, f"Turn {state['turn']}: {msg} (-₹{cost}, +{vote_gain} Votes)")
+st.set_page_config(
+    page_title="Political Empire",
+    page_icon="🗳️",
+    layout="wide"
+)
+
+# -------------------------------------------------
+# GAME TITLE
+# -------------------------------------------------
+
+st.title("🗳️ Political Empire")
+st.caption("Ujjain Campaign • Student Union Election • 2002")
+
+# -------------------------------------------------
+# PLAYER
+# -------------------------------------------------
+
+DEFAULT_PLAYER = {
+
+    "name": "Shashank",
+
+    "money": 5000,
+
+    "land": 0.50,
+
+    "popularity": 5,
+
+    "trust": 10,
+
+    "supporters": 20,
+
+    "turn": 1,
+
+    "stage": "Student Union",
+
+    "bio": 25,
+
+    "commerce": 50,
+
+    "arts": 15,
+
+    "girls": 35,
+
+    "completed": False
+
+}
+
+if "player" not in st.session_state:
+
+    st.session_state.player = DEFAULT_PLAYER.copy()
+
+player = st.session_state.player
+
+# -------------------------------------------------
+# SIDEBAR
+# -------------------------------------------------
+
+st.sidebar.title("Player")
+
+st.sidebar.metric("Money", f"₹{player['money']}")
+
+st.sidebar.metric("Land", f"{player['land']:.2f} Acre")
+
+st.sidebar.metric("Popularity", f"{player['popularity']} %")
+
+st.sidebar.metric("Trust", f"{player['trust']} %")
+
+st.sidebar.metric("Supporters", player["supporters"])
+
+st.sidebar.divider()
+
+st.sidebar.write("### Hidden Survey")
+
+def stars(value):
+
+    if value >= 80:
+        return "★★★★★"
+
+    elif value >= 60:
+        return "★★★★☆"
+
+    elif value >= 40:
+        return "★★★☆☆"
+
+    elif value >= 20:
+        return "★★☆☆☆"
+
     else:
-        state['logs'].insert(0, "Fund kam hai! Jugaad karo.")
+        return "★☆☆☆☆"
 
-def reset_game():
-    st.session_state.game_state = {
-        'stage': 'map',
-        'district': None, 'fund': 10000, 'votes': 0, 'land': 0, 'turn': 1, 'logs': ["Naya game shuru!"]
-    }
 
-# UI Logic
-st.title("🗳️ MP Neta: Strategy Campaign")
+st.sidebar.write("Bio :", stars(player["bio"]))
 
-if st.session_state.game_state['stage'] == 'map':
-    st.subheader("Map Chunein:")
-    districts = ["Indore", "Ujjain", "Bhopal", "Gwalior", "Jabalpur"]
-    selected = st.selectbox("Apna Jila Chunein", districts)
-    if st.button("Mission Shuru Karein"):
-        st.session_state.game_state['stage'] = 'play'
-        st.session_state.game_state['district'] = selected
-        st.rerun()
+st.sidebar.write("Commerce :", stars(player["commerce"]))
 
-elif st.session_state.game_state['stage'] == 'play':
-    state = st.session_state.game_state
-    st.sidebar.header(f"Jila: {state['district']}")
-    st.sidebar.metric("Fund", f"₹{state['fund']}")
-    st.sidebar.metric("Votes", state['votes'])
-    st.sidebar.metric("Zameen", state['land'])
-    
-    st.write(f"Turn: {state['turn']} | Target: 2000 Votes")
+st.sidebar.write("Arts :", stars(player["arts"]))
 
-    # Actions
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🏢 Zameen Kharido (₹3000)"):
-            play_action(3000, 100, 1, "Zameen ka kabza le liya!")
-        if st.button("📢 Badi Rally (₹1500)"):
-            play_action(1500, 500, 0, "Public me bhaukaal ban gaya.")
-    with col2:
-        if st.button("🤝 Builder se Donation (Jugaad)"):
-            st.session_state.game_state['fund'] += 2000
-            st.session_state.game_state['logs'].insert(0, "Builder se paisa liya, par Reputation down.")
-            st.rerun()
+st.sidebar.write("Girls :", stars(player["girls"]))
 
-    # Win Condition
-    if state['votes'] >= 2000:
-        st.success("Badhai ho! Aap jeet gaye!")
-        if st.button("Wapas Map"):
-            reset_game()
-            st.rerun()
+st.sidebar.divider()
 
-    st.subheader("Log Feed:")
-    for log in state['logs'][:5]:
-        st.text(log)
+if st.sidebar.button("Restart Game"):
 
-elif st.session_state.game_state['stage'] == 'game_over':
-    st.write("Game Over!")
-    if st.button("Restart"):
-        reset_game()
-        st.rerun()
+    st.session_state.player = DEFAULT_PLAYER.copy()
+
+    st.rerun()
+
+# -------------------------------------------------
+# HEADER
+# -------------------------------------------------
+
+left, right = st.columns(2)
+
+with left:
+
+    st.info(f"""
+### Election
+
+Year : **2002**
+
+Stage : **{player['stage']}**
+
+Turn : **{player['turn']} / 10**
+""")
+
+with right:
+
+    st.success("""
+### Objective
+
+✅ Win Election
+
+✅ Save Money
+
+✅ Increase Popularity
+
+✅ Buy More Land
+""")
